@@ -4,7 +4,7 @@ This is an early stage development project which hopes to createa a simple midi 
 I have a midi controller and keyboard with no audio output. I'd like to be able to plug it into a raspberry pi to make a portable instrument with very simple controls.
 
 Hardware:
-AKASI MPK mini MKII
+AKAI MPK mini MKII
 
 Raspberry Pi with Raspbian GNU/Linux 11 (bullseye)
 Pi Model 3B  V1.2
