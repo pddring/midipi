@@ -16,3 +16,8 @@ Pi Model 3B  V1.2
     CONFIG_USB_F_MIDI=m
     CONFIG_USB_CONFIGFS_F_MIDI=y
     CONFIG_USB_MIDI_GADGET=m
+
+3) Enable SPI for the LCD screen
+    sudo raspi-config
+Choose Interfacing Options -> SPI -> Yes
+

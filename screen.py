@@ -48,10 +48,24 @@ class ScreenController:
         # Draw a black filled box to clear the image.
         draw.rectangle((0,0,width,height), outline=0, fill=0)
         self.disp.LCD_ShowImage(self.image,0,0)
-    
+
     def load_image(self, filename):
-        image = Image.open(filename)
-        self.disp.LCD_ShowImage(image,0,0)
+        self.image = Image.open(filename)
+        self.disp.LCD_ShowImage(self.image,0,0)
+
+    def update(self):
+        self.disp.LCD_ShowImage(self.image,0,0)
+
+    def get_drawing(self):
+        draw = ImageDraw.Draw(self.image)
+        return draw
+
+
+    def print(self, text, pos=(0,0), fill=(255,255,255,255), update=True):
+        draw = ImageDraw.Draw(self.image)
+        draw.text(pos, text, fill)
+        if update:
+            self.update()
 
     def show_status(self):
         draw = ImageDraw.Draw(self.image)
