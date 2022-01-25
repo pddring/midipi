@@ -14,6 +14,25 @@ KEY1_PIN       = 21
 KEY2_PIN       = 20
 KEY3_PIN       = 16
 class ScreenController:
+    def get_buttons(self):
+        buttons = []
+        if GPIO.input(KEY_UP_PIN) == 0:
+            buttons.append("up")
+        if GPIO.input(KEY_DOWN_PIN) == 0:
+            buttons.append("down")
+        if GPIO.input(KEY_LEFT_PIN) == 0:
+            buttons.append("left")
+        if GPIO.input(KEY_RIGHT_PIN) == 0:
+            buttons.append("right")
+        if GPIO.input(KEY_PRESS_PIN) == 0:
+            buttons.append("middle")
+        if GPIO.input(KEY1_PIN) == 0:
+            buttons.append("1")
+        if GPIO.input(KEY2_PIN) == 0:
+            buttons.append("2")
+        if GPIO.input(KEY3_PIN) == 0:
+            buttons.append("3")
+        return buttons
 
     def __init__(self):
         print("Setting up screen")

@@ -1,6 +1,8 @@
+import socket
 import mido
 import time
 import threading
+import os
 from screen import ScreenController
 
 s = ScreenController()
@@ -9,16 +11,48 @@ inputs = mido.get_input_names()
 outputs = mido.get_output_names()
 ports_in = []
 ports_out = []
+program_selected = 1
+reverb_size = 0
 
+# called in UI thread
 def update_ui():
+	previous_values = {
+		"reverb_size": reverb_size
+	}
+	# load image
 	s.load_image("keys.png")
+	programs = []
+
+	# load list of program names
+	with open("midi_programs.txt") as f:
+		contents = f.read().split("\n")
+		for line in contents:
+			programs.append(line)
+
+	# connect to fluidsynth
+	tcp = socket.socket()
+	tcp.connect(("localhost", 9800))
+	tcp.send("set synth.nreverb.active 1\n".encode())
+	
 	d = s.get_drawing()
 	t = 0
 	while True:
-		s.print(str(t), fill=(0,0,0,255))
-		t += 1
-		time.sleep(1)
-		d.rectangle((0,0, 128, 10), fill=(255,255,255,255))
+		d.rectangle((0,0, 128, 20), fill=(255,255,255,255))
+		s.print(str(program_selected) + ": " + programs[program_selected], fill=(0,0,0,255),update=False)
+		s.print("Reverb: " + str(round(reverb_size, 2)), pos=(0, 10), fill=(0,0,0,255))
+		
+		if previous_values["reverb_size"] != reverb_size:
+			m = "set synth.reverb.room-size " + str(round(reverb_size,2)) + "\n"
+			print(m)
+			tcp.send(m.encode())
+			previous_values["reverb_size"] = reverb_size
+		
+		buttons = s.get_buttons()
+		if "middle" in buttons:
+			os.system("sudo shutdown -h now")
+
+		time.sleep(.1)
+		
 
 
 def show_all():
@@ -66,11 +100,15 @@ def connect_output(index=0, match=""):
 	port = mido.open_output(midi_output)
 	ports_out.append(port)
 
+# start ui thread
 ui_thread = threading.Thread(target=update_ui)
 ui_thread.start()
+
+# connect midi devices
 show_all()
 connect_input(match="MPK")
 connect_output(match="FLUID")
+
 for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 	if msg.type=="note_on":
 		print("Note on:", msg.note, msg.channel, msg.velocity)
@@ -80,9 +118,13 @@ for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 		print("Control change: ", msg)
 		if msg.control==3:
 			m = mido.Message("program_change", program=msg.value, channel=msg.channel)
-			print(m)
+			program_selected = msg.value
 			for p in  ports_out:
 				p.send(m)
+		
+		# reverb room size
+		if msg.control==4:
+			reverb_size = msg.value / 127
 	else:
 		print(msg)
 	for p in ports_out:
