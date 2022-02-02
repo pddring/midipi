@@ -68,7 +68,7 @@ class Akai_MPK_Mini():
             ("pad_channel", 9),  # [0,15]
             ("key_channel", 0),  # [0,15]
 
-            ("key_octave", 3),  # [0,8] (-4,4)
+            ("key_octave", 4),  # [0,8] (-4,4)
 
             ("arp_on", 0),  # [0=OFF; 1=ON] no effect on programmes...?
             ("arp_mode", 0),  # [0=UP; 1=DOWN; 2=EXCLUSIVE; 3=INCLUSIVE; 4=ORDER; 5=RANDOM]
@@ -98,42 +98,42 @@ class Akai_MPK_Mini():
             ("y_axis_U", 82),
 
             # Bank A
-            ("b1_p1_NT", 0),  # [0,127]
+            ("b1_p1_NT", 35),  # [0,127]
             ("b1_p1_PC", 56),  # [0,127]
             ("b1_p1_CC", 31),  # [0,127]
             ("b1_p1_TP", 1),  # [0=TOGGLE; 1=MOMENTARY]
 
-            ("b1_p2_NT", 1),
+            ("b1_p2_NT", 38),
             ("b1_p2_PC", 124),
             ("b1_p2_CC", 32),
             ("b1_p2_TP", 1),
 
-            ("b1_p3_NT", 2),
+            ("b1_p3_NT", 42),
             ("b1_p3_PC", 123),
             ("b1_p3_CC", 33),
             ("b1_p3_TP", 1),
 
-            ("b1_p4_NT", 3),
+            ("b1_p4_NT", 51),
             ("b1_p4_PC", 118),
             ("b1_p4_CC", 34),
             ("b1_p4_TP", 1),
 
-            ("b1_p5_NT", 4),
+            ("b1_p5_NT", 46),
             ("b1_p5_PC", 110),
             ("b1_p5_CC", 35),
             ("b1_p5_TP", 1),
 
-            ("b1_p6_NT", 5),
+            ("b1_p6_NT", 49),
             ("b1_p6_PC", 90),
             ("b1_p6_CC", 36),
             ("b1_p6_TP", 1),
 
-            ("b1_p7_NT", 6),
+            ("b1_p7_NT", 45),
             ("b1_p7_PC", 87),
             ("b1_p7_CC", 37),
             ("b1_p7_TP", 1),
 
-            ("b1_p8_NT", 7),
+            ("b1_p8_NT", 47),
             ("b1_p8_PC", 0),
             ("b1_p8_CC", 38),
             ("b1_p8_TP", 1),
@@ -180,37 +180,37 @@ class Akai_MPK_Mini():
             ("b2_p8_TP", 0),
 
             # Knobs
-            ("k1_CC", 47),  # [0,127]
-            ("k1_LO", 63),  # [0,127]
-            ("k1_HI", 71),  # [0,127]
+            ("k1_CC", 1),  # [0,127]
+            ("k1_LO", 0),  # [0,127]
+            ("k1_HI", 127),  # [0,127]
 
-            ("k2_CC", 48),
-            ("k2_LO", 64),
-            ("k2_HI", 72),
+            ("k2_CC", 2),
+            ("k2_LO", 0),
+            ("k2_HI", 127),
 
-            ("k3_CC", 49),
-            ("k3_LO", 65),
-            ("k3_HI", 73),
+            ("k3_CC", 3),
+            ("k3_LO", 0),
+            ("k3_HI", 127),
 
-            ("k4_CC", 50),
-            ("k4_LO", 66),
-            ("k4_HI", 74),
+            ("k4_CC", 4),
+            ("k4_LO", 0),
+            ("k4_HI", 127),
 
-            ("k5_CC", 59),
-            ("k5_LO", 67),
-            ("k5_HI", 75),
+            ("k5_CC", 5),
+            ("k5_LO", 0),
+            ("k5_HI", 127),
 
-            ("k6_CC", 60),
-            ("k6_LO", 68),
-            ("k6_HI", 76),
+            ("k6_CC", 6),
+            ("k6_LO", 0),
+            ("k6_HI", 127),
 
-            ("k7_CC", 61),
-            ("k7_LO", 69),
-            ("k7_HI", 77),
+            ("k7_CC", 7),
+            ("k7_LO", 0),
+            ("k7_HI", 127),
 
-            ("k8_CC", 62),
-            ("k8_LO", 70),
-            ("k8_HI", 78),
+            ("k8_CC", 8),
+            ("k8_LO", 0),
+            ("k8_HI", 127),
 
             ("key_transpose", 3),  # [0,24]
             ("sysex_end", 247)  # [247]
@@ -240,7 +240,7 @@ class Akai_MPK_Mini():
             if any(mpk in p for mpk in ("MPKmini", "MPK Mini")):
                 self.mi.open_port(i)
                 self.mi.ignore_types(sysex=False)
-                self.mi.set_callback(self.rx)
+                #self.mi.set_callback(self.rx)
                 is_in_open = True
 
         if not is_out_open and not is_in_open:

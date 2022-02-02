@@ -4,6 +4,7 @@ import time
 import threading
 import os
 from screen import ScreenController
+import mpk
 
 s = ScreenController()
 
@@ -105,9 +106,12 @@ ui_thread = threading.Thread(target=update_ui)
 ui_thread.start()
 
 # connect midi devices
+m = mpk.Akai_MPK_Mini()
+m.send_RAM()
 show_all()
 connect_input(match="MPK")
 connect_output(match="FLUID")
+connect_output(match="TD-17")
 
 for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 	if msg.type=="note_on":
