@@ -14,7 +14,10 @@ outputs = mido.get_output_names()
 ports_in = []
 ports_out = []
 program_selected = 1
+volume = 127
 reverb_size = 0
+chorus = 0
+last_changed = "Volume"
 
 # called in UI thread
 def update_ui():
@@ -52,11 +55,6 @@ def update_ui():
 		for line in contents:
 			programs.append(line)
 
-	# connect to fluidsynth
-	tcp = socket.socket()
-	tcp.connect(("localhost", 9800))
-	tcp.send("set synth.nreverb.active 1\n".encode())
-	
 	
 	t = 0
 	while True:
@@ -64,15 +62,25 @@ def update_ui():
 		s.image = images[group % len(images)]
 		d = s.get_drawing()
 		d.rectangle((0,0, 128, 20), fill=(255,255,255,255))
-		s.print(str(program_selected) + ": " + programs[program_selected], fill=(0,0,0,255),update=False)
-		s.print("Reverb: " + str(round(reverb_size, 2)), pos=(0, 10), fill=(0,0,0,255))
+
+		#control property slider
+		d.rectangle((0,115,40,125), fill=(255,255,255,255))
+		s.print(last_changed, fill=(0,0,0,255), update=False, pos=(1, 115))
+		d.rectangle((0,125,128,128), fill=(0,0,0,255))
+		if last_changed == "Volume":
+			d.rectangle((0,125,volume+1,128), fill=(255,0,0,255))
+		if last_changed == "Chorus":
+			d.rectangle((0,125,chorus+1,128), fill=(0,255,0,255))
+		if last_changed == "Reverb":
+			d.rectangle((0,125,reverb_size+1,128), fill=(0,0,255,255))
 		
-		if previous_values["reverb_size"] != reverb_size:
-			m = "set synth.reverb.room-size " + str(round(reverb_size,2)) + "\n"
-			print(m)
-			tcp.send(m.encode())
-			previous_values["reverb_size"] = reverb_size
 		
+		# program
+		s.print(str(program_selected), fill=(255,0,0,255), pos=(60,0),update=False)
+		s.print(programs[program_selected], pos=(0,10), fill=(0,0,0,255),update=False)
+		s.update()		
+
+
 		buttons = s.get_buttons()
 		if "middle" in buttons:
 			os.system("sudo shutdown -h now")
@@ -151,8 +159,24 @@ for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 				p.send(m)
 		
 		# reverb room size
-		if msg.control==4:
-			reverb_size = msg.value / 127
+		if msg.control==91:
+			reverb_size = msg.value
+			last_changed = "Reverb"
+
+		# chorus size
+		if msg.control==93:
+			chorus = msg.value
+			last_changed = "Chorus"
+
+		# volume
+		if msg.control==7:
+			volume = msg.value
+			last_changed = "Volume"
+
+		
+
+		
+
 	else:
 		print(msg)
 	for p in ports_out:
