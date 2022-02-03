@@ -5,6 +5,7 @@ import threading
 import os
 from screen import ScreenController
 import mpk
+from PIL import Image
 
 s = ScreenController()
 
@@ -22,6 +23,27 @@ def update_ui():
 	}
 	# load image
 	s.load_image("keys.png")
+	image_names = ["keyboard", 
+		"chromatic_percussion", 
+		"organ", 
+		"guitar", 
+		"bass", 
+		"strings", 
+		"ensemble", 
+		"brass",
+		"reed",
+		"pipe",
+		"synth_lead",
+		"synth_pad",
+		"synth_effects",
+		"ethnic",
+		"percussive",
+		"sound_effects"]
+	images = []
+	for name in image_names:
+		print("Loading " + name)
+		images.append(Image.open("images/" + name + ".png"))
+	
 	programs = []
 
 	# load list of program names
@@ -35,9 +57,12 @@ def update_ui():
 	tcp.connect(("localhost", 9800))
 	tcp.send("set synth.nreverb.active 1\n".encode())
 	
-	d = s.get_drawing()
+	
 	t = 0
 	while True:
+		group = program_selected // 8
+		s.image = images[group % len(images)]
+		d = s.get_drawing()
 		d.rectangle((0,0, 128, 20), fill=(255,255,255,255))
 		s.print(str(program_selected) + ": " + programs[program_selected], fill=(0,0,0,255),update=False)
 		s.print("Reverb: " + str(round(reverb_size, 2)), pos=(0, 10), fill=(0,0,0,255))
@@ -111,7 +136,6 @@ m.send_RAM()
 show_all()
 connect_input(match="MPK")
 connect_output(match="FLUID")
-connect_output(match="TD-17")
 
 for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 	if msg.type=="note_on":
