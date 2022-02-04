@@ -98,42 +98,42 @@ class Akai_MPK_Mini():
             ("y_axis_U", 82),
 
             # Bank A
-            ("b1_p1_NT", 35),  # [0,127]
+            ("b1_p1_NT", 36),  # [0,127] kick
             ("b1_p1_PC", 56),  # [0,127]
             ("b1_p1_CC", 31),  # [0,127]
             ("b1_p1_TP", 1),  # [0=TOGGLE; 1=MOMENTARY]
 
-            ("b1_p2_NT", 38),
+            ("b1_p2_NT", 57), # crash 2
             ("b1_p2_PC", 124),
             ("b1_p2_CC", 32),
             ("b1_p2_TP", 1),
 
-            ("b1_p3_NT", 42),
+            ("b1_p3_NT", 42), # hi hat closed
             ("b1_p3_PC", 123),
             ("b1_p3_CC", 33),
             ("b1_p3_TP", 1),
 
-            ("b1_p4_NT", 51),
+            ("b1_p4_NT", 51), # ride
             ("b1_p4_PC", 118),
             ("b1_p4_CC", 34),
             ("b1_p4_TP", 1),
 
-            ("b1_p5_NT", 46),
+            ("b1_p5_NT", 38), # snare
             ("b1_p5_PC", 110),
             ("b1_p5_CC", 35),
             ("b1_p5_TP", 1),
 
-            ("b1_p6_NT", 49),
+            ("b1_p6_NT", 48), # tom
             ("b1_p6_PC", 90),
             ("b1_p6_CC", 36),
             ("b1_p6_TP", 1),
 
-            ("b1_p7_NT", 45),
+            ("b1_p7_NT", 46), # hi hat open
             ("b1_p7_PC", 87),
             ("b1_p7_CC", 37),
             ("b1_p7_TP", 1),
 
-            ("b1_p8_NT", 47),
+            ("b1_p8_NT", 53), # ride bell
             ("b1_p8_PC", 0),
             ("b1_p8_CC", 38),
             ("b1_p8_TP", 1),

@@ -18,9 +18,11 @@ volume = 127
 reverb_size = 0
 chorus = 0
 last_changed = "Volume"
+quiet_mode = False
 
 # called in UI thread
 def update_ui():
+	global program_selected
 	previous_values = {
 		"reverb_size": reverb_size
 	}
@@ -85,8 +87,24 @@ def update_ui():
 		if "middle" in buttons:
 			os.system("sudo shutdown -h now")
 
+		if "1" in buttons:
+			program_selected = (program_selected - 1) % 128
+			update_program()
+		if "3" in buttons:
+			program_selected = (program_selected + 1) % 128
+			update_program()
+
+		if len(buttons) > 0:
+			print(buttons)
+
 		time.sleep(.1)
 		
+
+def update_program():
+	print("Program changed to", program_selected)
+	m = mido.Message("program_change", program=program_selected, channel=0)
+	for p in  ports_out:
+		p.send(m)
 
 
 def show_all():
@@ -144,14 +162,17 @@ m.send_RAM()
 show_all()
 connect_input(match="MPK")
 connect_output(match="FLUID")
-
+connect_output(match="TD-17")
 for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 	if msg.type=="note_on":
-		print("Note on:", msg.note, msg.channel, msg.velocity)
+		if not quiet_mode:
+			print("Note on:", msg.note, msg.channel, msg.velocity)
 	elif msg.type=="note_off":
-		print("Note off:",msg.note, msg.channel, msg.velocity)
+		if not quiet_mode:
+			print("Note off:",msg.note, msg.channel, msg.velocity)
 	elif msg.type=="control_change":
-		print("Control change: ", msg)
+		if not quiet_mode:
+			print("Control change: ", msg)
 		if msg.control==3:
 			m = mido.Message("program_change", program=msg.value, channel=msg.channel)
 			program_selected = msg.value
@@ -178,7 +199,8 @@ for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
 		
 
 	else:
-		print(msg)
+		if not quiet_mode:
+			print(msg)
 	for p in ports_out:
 		p.send(msg)
 	#s.show_status()
