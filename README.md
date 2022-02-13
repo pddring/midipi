@@ -7,7 +7,9 @@ Hardware:
 AKAI MPK mini MKII
 
 Raspberry Pi with Raspbian GNU/Linux 11 (bullseye)
-Pi Model 3B  V1.2
+Pi Model 4 
+
+Waveshare 1.44" LCD Hat available from: https://www.amazon.co.uk/Waveshare-1-44inch-interface-Direct-pluggable-Raspberry/dp/B077Z7DWW1
 
 ## Setup
 1) Start with a fresh SD card with Raspberry Pi OS Lite: e.g. https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-11-08/2021-10-30-raspios-bullseye-armhf-lite.zip
