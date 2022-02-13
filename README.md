@@ -28,6 +28,6 @@ If you want the synth to start when the pi boots you will need to edit the file 
     `>>> sudo nano /etc/rc.local`
     add the following lines above the line at the end that says exit 0
     
-    `cd /home/pi/midipi
-    ./startsynth.sh`
+    cd /home/pi/midipi
+    ./startsynth.sh
     
