@@ -3,7 +3,14 @@ import mido
 import time
 import threading
 import os
-from screen import ScreenController
+kernel = os.uname()
+rpi = "Raspberry" in kernel
+if rpi:
+	print("Running on a raspberry pi")
+	from screen import ScreenController
+else:
+	print("Running desktop version")
+	from desktop import ScreenController
 import mpk
 from PIL import Image
 
@@ -163,7 +170,10 @@ show_all()
 connect_input(match="MPK")
 connect_output(match="FLUID")
 connect_output(match="TD-17")
+
+print(ports_in)
 for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
+	
 	if msg.type=="note_on":
 		if not quiet_mode:
 			print("Note on:", msg.note, msg.channel, msg.velocity)
