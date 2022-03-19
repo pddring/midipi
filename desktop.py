@@ -1,5 +1,6 @@
 import time
-from PIL import Image,ImageDraw,ImageFont,ImageColor
+from PIL import Image,ImageDraw,ImageFont,ImageColor,ImageTk
+import tkinter
 KEY_UP_PIN     = 6 
 KEY_DOWN_PIN   = 19
 KEY_LEFT_PIN   = 5
@@ -10,7 +11,7 @@ KEY2_PIN       = 20
 KEY3_PIN       = 16
 class ScreenController:
     def get_buttons(self):
-        buttons = []
+        return self.keys
         """if GPIO.input(KEY_UP_PIN) == 0:
             buttons.append("up")
         if GPIO.input(KEY_DOWN_PIN) == 0:
@@ -29,33 +30,58 @@ class ScreenController:
             buttons.append("3")"""
         return buttons
 
+    def keydown(self, e):
+        k = e.keysym.lower()
+        if k == "return":
+            k = "middle"
+        if k not in self.keys:
+            self.keys.append(k)
+
+    def keyup(self, e):
+        k = e.keysym.lower()
+        if k == "return":
+            k = "middle"
+        self.keys.remove(k)
+
     def __init__(self):
         print("Setting up screen")
-
-        
+        self.root = tkinter.Tk()
 
         # Create blank image for drawing.
         # Make sure to create image with mode '1' for 1-bit color.
-        width = 128
-        height = 128
-        self.image = Image.new('RGB', (width, height))
+        self.width = 128
+        self.height = 128
+        self.image = Image.new('RGB', (self.width, self.height))
+
+        self.tkimage = tkinter.Label(self.root)
+        self.tkimage.pack(fill="both", expand="yes")
+
+        self.root.bind("<KeyPress>", self.keydown)
+        self.root.bind("<KeyRelease>", self.keyup)
+        self.keys = []
         
         # Get drawing object to draw on image.
         draw = ImageDraw.Draw(self.image)
 
         # Draw a black filled box to clear the image.
-        draw.rectangle((0,0,width,height), outline=0, fill=0)
+        draw.rectangle((0,0, self.width, self.height), outline=0, fill=0)
         #self.disp.LCD_ShowImage(self.image,0,0)
 
     def load_image(self, filename):
         self.image = Image.open(filename)
         #self.disp.LCD_ShowImage(self.image,0,0)
 
+
     def update(self):
         #self.disp.LCD_ShowImage(self.image,0,0)
-        pass
+        img = ImageTk.PhotoImage(self.image)
+        self.tkimage.configure(image=img)
+        self.tkimage.image = img
+        self.root.update()
 
-    def get_drawing(self):
+    def get_drawing(self, new_image = False):
+        if new_image == True:
+            self.image = Image.new('RGB', (self.width, self.height))
         draw = ImageDraw.Draw(self.image)
         return draw
 
@@ -117,3 +143,10 @@ class ScreenController:
         else: # button is pressed:
             draw.ellipse((70,40,90,60), outline=255, fill=0) #A button filled
         self.disp.LCD_ShowImage(self.image,0,0)
+
+if __name__ == "__main__":
+    s = ScreenController()
+    s.load_image("images/brass.png")
+    s.print("hello", pos=(0,10), fill=(0,0,0,255),update=False)
+    s.update()
+    s.root.mainloop()
