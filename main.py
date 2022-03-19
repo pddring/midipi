@@ -196,7 +196,7 @@ def update_ui():
 			connected = []
 			for i in range(len(options)):
 				c = False
-				for p in ports_out:
+				for p in ports_in:
 					if p.name == options[i]:
 						c = True
 				connected.append(c)
