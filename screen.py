@@ -77,7 +77,7 @@ class ScreenController:
 
     def get_drawing(self, new_image = False):
         if new_image == True:
-            self.image = Image.new('RGB', (self.width, self.height))
+            self.image = Image.new('RGB', (128,128))
         draw = ImageDraw.Draw(self.image)
         return draw
 
