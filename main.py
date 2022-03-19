@@ -405,8 +405,17 @@ def update_midi():
 
 def reconnect_midi():
 	global midi_thread
-	midi_thread.terminate()
-	print("Closing midi devices and restarting")
+	
+	reconnect_ids = []
+	print("Disconnecting from all inputs")
+	for p in ports_in:
+		p.close()
+		reconnect_ids.append(inputs.index(p.name))
+		print("Disconnected from", p.name)
+	
+	for p in reconnect_ids:
+		connect_input(p)
+
 	midi_thread = threading.Thread(target=update_midi)
 	midi_thread.start()
 
