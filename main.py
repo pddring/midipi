@@ -1,7 +1,7 @@
 import socket
 import mido
 import time
-import multiprocessing
+import threading
 import os
 kernel = "windows"
 if "uname" in dir(os):
@@ -407,7 +407,7 @@ def reconnect_midi():
 	global midi_thread
 	midi_thread.terminate()
 	print("Closing midi devices and restarting")
-	midi_thread = multiprocessing.Process(target=update_midi)
+	midi_thread = threading.Thread(target=update_midi)
 	midi_thread.start()
 
 
@@ -419,7 +419,7 @@ if __name__ == "__main__":
 	connect_input(match="MPK")
 	connect_output(match="FLUID")
 	connect_output(match="TD-17")
-	midi_thread = multiprocessing.Process(target=update_midi)
+	midi_thread = threading.Thread(target=update_midi)
 	midi_thread.start()
 
 	update_ui()
