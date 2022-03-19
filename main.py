@@ -6,7 +6,7 @@ import os
 kernel = "windows"
 if "uname" in dir(os):
 	kernel = os.uname()
-rpi = "Raspberry" in kernel
+rpi = "aarch64" in kernel
 if rpi:
 	print("Running on a raspberry pi")
 	from screen import ScreenController
@@ -193,10 +193,19 @@ def update_ui():
 			s.print("MIDI Input devces", fill=(0,0,255,255), pos=(0,0), update=False)
 
 			y = 20
+			connected = []
 			for i in range(len(options)):
+				c = False
+				for p in ports_out:
+					if p.name == options[i]:
+						c = True
+				connected.append(c)
 				if i == option:
 					d.rectangle((0,y,128,y+20), fill=(255,0,0,255))
-				s.print(options[i], fill=(0,0,0,255), pos=(0,y), update=False)
+				m = "[ ] "
+				if connected[i]:
+					m = "[X] "
+				s.print(m + options[i], fill=(0,0,0,255), pos=(0,y), update=False)
 				y+=20
 			s.update()
 

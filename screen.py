@@ -75,7 +75,9 @@ class ScreenController:
     def update(self):
         self.disp.LCD_ShowImage(self.image,0,0)
 
-    def get_drawing(self):
+    def get_drawing(self, new_image = False):
+        if new_image == True:
+            self.image = Image.new('RGB', (self.width, self.height))
         draw = ImageDraw.Draw(self.image)
         return draw
 
