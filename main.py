@@ -23,7 +23,7 @@ volume = 127
 reverb_size = 0
 chorus = 0
 last_changed = "Volume"
-quiet_mode = False
+quiet_mode = True
 
 
 MODE_CHOOSE_PROGRAM = 1
@@ -271,8 +271,8 @@ def update_ui():
 			if "left" in buttons:
 				mode = MODE_SETUP_MIDI
 
-		if pipe.poll(.1):
-			msg = p.recv()
+	while pipe.poll(.1):
+			msg = pipe.recv()
 			handle_midi(msg)
 		
 def handle_midi(msg):
