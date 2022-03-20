@@ -1,5 +1,5 @@
 import socket
-import mido
+import midi
 import time
 import threading
 import os
@@ -18,10 +18,6 @@ from PIL import Image
 
 s = ScreenController()
 
-inputs = mido.get_input_names()
-outputs = mido.get_output_names()
-ports_in = []
-ports_out = []
 program_selected = 1
 volume = 127
 reverb_size = 0
@@ -39,7 +35,8 @@ MODE_MIDI_OUT = 5
 # called in UI thread
 def update_ui():
 	mode = MODE_CHOOSE_PROGRAM
-	global program_selected
+	global program_selected, last_changed, volume, reverb_size, chorus, quiet_mode
+
 	previous_values = {
 		"reverb_size": reverb_size
 	}
@@ -74,10 +71,10 @@ def update_ui():
 		for line in contents:
 			programs.append(line)
 
-	
 	t = 0
 	option = 0
 	while True:
+		pipe = mi.ui_pipe
 		buttons = s.get_buttons()
 
 		if mode == MODE_CHOOSE_PROGRAM:
@@ -104,10 +101,10 @@ def update_ui():
 			s.update()		
 			if "1" in buttons:
 				program_selected = (program_selected - 1) % 128
-				update_program()
+				mi.change_program(program_selected)
 			if "3" in buttons:
 				program_selected = (program_selected + 1) % 128
-				update_program()
+				mi.change_program(program_selected)
 
 			if "left" in buttons:
 				mode = MODE_MAIN_MENU
@@ -144,8 +141,10 @@ def update_ui():
 					mode = MODE_SETUP_MIDI
 					option = 0
 				elif option == 2:
-					os.system("sudo shutdown -h now")
-					exit()
+					if kernel == "windows":
+						exit()
+					else:
+						os.system("sudo shutdown -h now")
 				
 			if "left" in buttons:
 				mode = MODE_CHOOSE_PROGRAM
@@ -187,7 +186,7 @@ def update_ui():
 				mode = MODE_MAIN_MENU
 
 		elif mode == MODE_MIDI_IN:
-			options = inputs
+			options = mi.available_inputs
 			d = s.get_drawing(True)
 			d.rectangle((0,0,128,128), fill=(255,255,255,255))
 			s.print("MIDI Input devces", fill=(0,0,255,255), pos=(0,0), update=False)
@@ -196,8 +195,8 @@ def update_ui():
 			connected = []
 			for i in range(len(options)):
 				c = False
-				for p in ports_in:
-					if p.name == options[i]:
+				for p in mi.connected_inputs:
+					if p == options[i]:
 						c = True
 				connected.append(c)
 				if i == option:
@@ -221,16 +220,16 @@ def update_ui():
 
 			if "middle" in buttons:
 				if connected[option]:
-					disconnect_input(option)
+					mi.disconnect_input(options[option])
 				else:
-					connect_input(option)
-				reconnect_midi()
+					mi.connect_input(options[option])
+				mi.reconnect()
 				
 			if "left" in buttons:
 				mode = MODE_SETUP_MIDI
 		
 		elif mode == MODE_MIDI_OUT:
-			options = outputs
+			options = mi.available_outputs
 			d = s.get_drawing(True)
 			d.rectangle((0,0,128,128), fill=(255,255,255,255))
 			s.print("MIDI Output devces", fill=(0,0,255,255), pos=(0,0), update=False)
@@ -239,8 +238,8 @@ def update_ui():
 			connected = []
 			for i in range(len(options)):
 				c = False
-				for p in ports_out:
-					if p.name == options[i]:
+				for p in mi.connected_outputs:
+					if p == options[i]:
 						c = True
 				connected.append(c)
 				if i == option:
@@ -264,172 +263,70 @@ def update_ui():
 
 			if "middle" in buttons:
 				if connected[option]:
-					disconnect_output(option)
+					mi.disconnect_output(options[option])
 				else:
-					connect_output(option)
-				reconnect_midi()
+					mi.connect_output(options[option])
+				mi.reconnect()
 				
 			if "left" in buttons:
 				mode = MODE_SETUP_MIDI
 
-		time.sleep(.1)
+		if pipe.poll(.1):
+			msg = p.recv()
+			handle_midi(msg)
 		
-
-def update_program():
-	print("Program changed to", program_selected)
-	m = mido.Message("program_change", program=program_selected, channel=0)
-	for p in  ports_out:
-		p.send(m)
-
-
-def show_all():
-	print("Inputs:")
-	for i in range(len(inputs)):
-		print("*", i, inputs[i])
-	print("Outputs:")
-	for i in range(len(outputs)):
-		print("*", i, outputs[i])
-
-def connect_all():
-	for midi_input in inputs:
-		print("Connecting to input" + midi_input)
-		port = mido.open_input(midi_input)
-		ports_in.append(port)
-	for midi_output in outputs:
-		print("Connecting to output" + midi_output)
-		port = mido.open_output(midi_output)
-		ports_out.append(port)
-
-def connect_input(index = -1, match=""):
-		# search for device matching description
-	if len(match) > 0:
-		for i in range(len(inputs)):
-			if match in inputs[i]:
-				index = i
-				print("Found input device:", inputs[i])
-				break
-
-	if index > -1:
-		midi_input = inputs[index]
-		print("Connecting to " + midi_input)
-		port = mido.open_input(midi_input)
-		ports_in.append(port)
-
-def connect_output(index=-1, match=""):
-	# search for device matching description
-	if len(match) > 0:
-		for i in range(len(outputs)):
-			if match in outputs[i]:
-				index = i
-				print("Found output device:", outputs[i])
-				break
-	if index > -1:
-		midi_output = outputs[index]
-		print("Connecting to output " + midi_output)
-		port = mido.open_output(midi_output)
-		ports_out.append(port)
-
-def disconnect_output(index=-1, match=""):
-	# search for device matching description
-	if len(match) > 0:
-		for i in range(len(outputs)):
-			if match in outputs[i]:
-				index = i
-				print("Found output device:", outputs[i])
-				break
-	if index > -1:
-		midi_output = outputs[index]
-		for o in ports_out:
-			if o.name == midi_output:
-				o.close()
-				print("Disconnecting to output " + midi_output)
-				ports_out.remove(o)
-				break
-
-def disconnect_input(index=-1, match=""):
-	# search for device matching description
-	if len(match) > 0:
-		for i in range(len(inputs)):
-			if match in inputs[i]:
-				index = i
-				print("Found input device:", outputs[i])
-				break
-	if index > -1:
-		midi_input = inputs[index]
-		for o in ports_in:
-			if o.name == midi_input:
-				o.close()
-				print("Disconnecting from input " + midi_input)
-				ports_in.remove(o)
-				break
-
-def update_midi():
-	print("Connected to: ", ports_in, ports_out)
-	for port, msg in mido.ports.multi_receive(ports_in, yield_ports=True):
-		
-		if msg.type=="note_on":
-			if not quiet_mode:
-				print("Note on:", msg.note, msg.channel, msg.velocity)
-		elif msg.type=="note_off":
-			if not quiet_mode:
-				print("Note off:",msg.note, msg.channel, msg.velocity)
-		elif msg.type=="control_change":
-			if not quiet_mode:
-				print("Control change: ", msg)
-			if msg.control==3:
-				m = mido.Message("program_change", program=msg.value, channel=msg.channel)
-				program_selected = msg.value
-				for p in  ports_out:
-					p.send(m)
+def handle_midi(msg):
+	global program_selected, last_changed, volume, reverb_size, chorus, quiet_mode
+	if msg.type=="note_on":
+		if not quiet_mode:
+			print("Note on:", msg.note, msg.channel, msg.velocity)
+	elif msg.type=="note_off":
+		if not quiet_mode:
+			print("Note off:",msg.note, msg.channel, msg.velocity)
+	elif msg.type=="control_change":
+		if not quiet_mode:
+			print("Control change: ", msg)
+		if msg.control==3:
+			program_selected = msg.value
 			
-			# reverb room size
-			if msg.control==91:
-				reverb_size = msg.value
-				last_changed = "Reverb"
+		# reverb room size
+		if msg.control==91:
+			reverb_size = msg.value
+			last_changed = "Reverb"
 
-			# chorus size
-			if msg.control==93:
-				chorus = msg.value
-				last_changed = "Chorus"
+		# chorus size
+		if msg.control==93:
+			chorus = msg.value
+			last_changed = "Chorus"		
 
-			# volume
-			if msg.control==7:
-				volume = msg.value
-				last_changed = "Volume"
-		else:
-			if not quiet_mode:
-				print(msg)
-		for p in ports_out:
-			p.send(msg)
-		#s.show_status()
-
-def reconnect_midi():
-	global midi_thread
-	
-	reconnect_ids = []
-	print("Disconnecting from all inputs")
-	for p in ports_in:
-		p.close()
-		reconnect_ids.append(inputs.index(p.name))
-		print("Disconnected from", p.name)
-	
-	for p in reconnect_ids:
-		connect_input(p)
-
-	midi_thread = threading.Thread(target=update_midi)
-	midi_thread.start()
-
+		# volume
+		if msg.control==7:
+			volume = msg.value
+			last_changed = "Volume"
+	else:
+		if not quiet_mode:
+			print(msg)
 
 if __name__ == "__main__":
 	# connect midi devices
 	m = mpk.Akai_MPK_Mini()
 	m.send_RAM()
-	show_all()
-	connect_input(match="MPK")
-	connect_output(match="FLUID")
-	connect_output(match="TD-17")
-	midi_thread = threading.Thread(target=update_midi)
-	midi_thread.start()
+	
+	mi = midi.MidiEngine(quiet_mode=False)
+
+	
+	#show_all()
+
+	mi.connect_input("MPK", method=midi.MATCH_REGEX)
+	mi.connect_output("FLUID", method=midi.MATCH_REGEX)
+	mi.connect_output("TD-17", method=midi.MATCH_REGEX)
+
+	mi.connect_input(0, method=midi.MATCH_INDEX)
+	mi.connect_output(0, method=midi.MATCH_INDEX)
+	mi.listen_all()
+	print(mi.connected_outputs, mi.connected_inputs)
+	#midi_thread = threading.Thread(target=update_midi)
+	#midi_thread.start()
 
 	update_ui()
 
