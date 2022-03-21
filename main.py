@@ -270,8 +270,11 @@ def update_ui():
 				
 			if "left" in buttons:
 				mode = MODE_SETUP_MIDI
-
-	while pipe.poll(.1):
+		midi_msg_count = 0
+		while pipe.poll(.1):
+			midi_msg_count += 1
+			if midi_msg_count > 10:
+				break
 			msg = pipe.recv()
 			handle_midi(msg)
 		
