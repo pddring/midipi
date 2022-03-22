@@ -274,8 +274,11 @@ def update_ui():
 				
 			if "left" in buttons:
 				mode = MODE_SETUP_MIDI
-
-	while pipe.poll(.1):
+		midi_msg_count = 0
+		while pipe.poll(.1):
+			midi_msg_count += 1
+			if midi_msg_count > 10:
+				break
 			msg = pipe.recv()
 			handle_midi(msg)
 		
@@ -325,8 +328,8 @@ if __name__ == "__main__":
 	mi.connect_output("FLUID", method=midi.MATCH_REGEX)
 	mi.connect_output("TD-17", method=midi.MATCH_REGEX)
 
-	mi.connect_input(0, method=midi.MATCH_INDEX)
-	mi.connect_output(0, method=midi.MATCH_INDEX)
+	#mi.connect_input(0, method=midi.MATCH_INDEX)
+	#mi.connect_output(0, method=midi.MATCH_INDEX)
 	mi.listen_all()
 	print(mi.connected_outputs, mi.connected_inputs)
 	#midi_thread = threading.Thread(target=update_midi)
