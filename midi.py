@@ -27,12 +27,13 @@ class MidiEngine:
                     print("Control change: ", msg)
                 if msg.control==3:
                     m = mido.Message("program_change", program=msg.value, channel=msg.channel)
-                    if msg.channel == 9:
-                        msg.channel = 0
-                        if not self.quiet_mode:
-                            print("Remapping program change from channel 10 to channel 1")
                     for o in outputs:
                         o.send(m)
+            if msg.type == "program_change" and msg.channel == 9:
+                msg.channel = 0
+                if not self.quiet_mode:
+                    print("Remapping program change from channel 10 to channel 1")
+                    
 
             self.midi_pipe.send(msg)
             for o in outputs:
