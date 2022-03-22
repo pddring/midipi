@@ -23,7 +23,7 @@ volume = 127
 reverb_size = 0
 chorus = 0
 last_changed = "Volume"
-quiet_mode = True
+quiet_mode = False
 
 
 MODE_CHOOSE_PROGRAM = 1
@@ -150,7 +150,7 @@ def update_ui():
 				mode = MODE_CHOOSE_PROGRAM
 		
 		elif mode == MODE_SETUP_MIDI:
-			options = ["MIDI input devices", "MIDI output devices"]
+			options = ["MIDI input devices", "MIDI output devices", "Rescan for devices"]
 			d = s.get_drawing(True)
 			d.rectangle((0,0,128,128), fill=(255,255,255,255))
 			s.print("MIDI Setup", fill=(0,0,255,255), pos=(0,0), update=False)
@@ -181,6 +181,10 @@ def update_ui():
 				elif option == 1:
 					option = 0
 					mode = MODE_MIDI_OUT
+				elif option == 2:
+					option = 0
+					mi.stop()
+					mi.scan()
 				
 			if "left" in buttons:
 				mode = MODE_MAIN_MENU
