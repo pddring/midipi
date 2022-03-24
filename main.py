@@ -5,8 +5,8 @@ import threading
 import os
 kernel = "windows"
 if "uname" in dir(os):
-	kernel = os.uname()
-rpi = "armv71" in kernel
+	kernel = os.uname()[4]
+rpi = kernel == "armv71"
 if rpi:
 	print("Running on a raspberry pi")
 	from screen import ScreenController
