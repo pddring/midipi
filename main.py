@@ -6,7 +6,7 @@ import os
 kernel = "windows"
 if "uname" in dir(os):
 	kernel = os.uname()
-rpi = "aarch64" in kernel
+rpi = "armv71" in kernel
 if rpi:
 	print("Running on a raspberry pi")
 	from screen import ScreenController
